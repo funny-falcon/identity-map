@@ -1,20 +1,63 @@
-module IdentityMap
+module ActionController
+  class Base
+  	module IdentityMap
+  	  module InstanceMethods
+		def with_identity_map
+		  ActiveRecord::Base.with_id_map {
+			yield
+		  }
+		end
+		
+		def without_identity_map
+		  ActiveRecord::Base.without_id_map {
+			yield
+		  }
+		end
+	  end
+  	  
+  	  module ClassMethods
+  	  	def use_identity_map(*args)
+  	  	  skip_around_filter :without_identity_map, *args
+  	  	  around_filter :with_identity_map, *args
+  	  	end
+  	  	
+  	  	def dont_use_identity_map(*args)
+  	  	  skip_around_filter :with_identity_map, *args
+  	  	  around_filter :without_identity_map, *args
+  	  	end
+  	  	
+  	  	def use_dispater_identity_map
+  	  	  if defined? ::ActionDispatch
+  	  	  	ActionDispatch::Callbacks.before :create_identity_map
+  	  	  	ActionDispatch::Callbacks.after :remove_identity_map
+  	  	  else
+  	  	  	ActionController::Dispatcher.before_dispatch :create_identity_map
+  	  	  	ActionController::Dispatcher.after_dispatch :remove_identity_map
+  	  	  end
+  	  	end
+  	  end
+  	  
 
-  def self.included(base)
-    base.before_dispatch :build_cache
-    base.after_dispatch :remove_cache
+  	end
+  	extend IdentityMap::ClassMethods
+  	include IdentityMap::InstanceMethods
   end
-
-  def build_cache
-    Thread.current['identity_map'] ||= Cache.new
-  end
-
-  def remove_cache
-    Thread.current['identity_map'] = nil
-  end
-
 end
-if Object.const_defined?("ActionController")
-  ActionController::Dispatcher.send :include, IdentityMap
+
+module DispatcherMethods
+  def create_identity_map
+	ActiveRecord::Base.create_identity_map
+  end
+  
+  def remove_identity_map
+	ActiveRecord::Base.drop_identity_map
+  end
+end
+
+if defined? ::ActionDispatch
+  ActionDispatch::Callbacks.send :include, DispatcherMethods
+  RAILS_DEFAULT_LOGGER.warn "CACHING OBJECTS"
+else
+  ActionController::Dispatcher.send :include, DispatcherMethods
   RAILS_DEFAULT_LOGGER.warn "CACHING OBJECTS"
 end
