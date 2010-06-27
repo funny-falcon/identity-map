@@ -17,42 +17,60 @@ module ActiveRecord
 	  module IdMapClassMethods
 
 		def id_map
-		  thread_id_map && thread_id_map.for_class(self)
+		  thread_id_map.try(:for_class, self)
 		end
 		
 		def if_id_map
 		  map = id_map
-		  yield map if map 
+		  yield map if map
 		end
 		
 		private
 	  
-		  def find_idmap_get(map, id)
-			map[ id ] ||= find_without_identity_map(id)
-		  end
-		  
 		  def find_with_identity_map( *args )
 			if_id_map do |map|
 			  unless args.size > 1 && args[1].values.any?
 				args0 = args[0]
 				if args0.is_a?(Array)
-				  return args0.map{|id| find_idmap_get(map,id)}
+				  result, to_find = [], []
+				  args0.each do |id| 
+				  	if (obj = map[id])
+				  	  result << obj
+				  	else
+				  	  to_find << id
+				  	end
+				  end
+				  result + find_without_identity_map( to_find )
 				else
-				  return find_idmap_get(map, args0)
+				  map[id] || find_without_identity_map(id)
 				end
 			  end
-			end
-			find_without_identity_map(*args)
+			end || find_without_identity_map(*args)
 		  end
 		  
 		  def instantiate_with_identity_map( record )
 			if_id_map do |map|
 			  id = record[primary_key]
-			  object = ( map[id] ||= instantiate_without_identity_map( record ) )
-			  object.instance_variable_get( :@attributes ).merge!( record )
-			  return object
-			end
-			instantiate_without_identity_map( record )
+			  if (object = map[id])
+				attrs = object.instance_variable_get( :@attributes )
+				unless (changed = object.instance_variable_get( :@changed_attributes )).blank?
+				  changed_keys = changed.keys
+				  attrs.merge!( record.except( changed_keys ) )
+				  changed.merge!( record.slice( changed_keys ) )
+				else
+				  attrs.merge!( record )
+				end
+				object
+			  else
+			  	map[id] = instantiate_without_identity_map( record )
+			  end
+			end || instantiate_without_identity_map( record )
+		  end
+		  
+		  def delete_with_identity_map( ids )
+		    res = delete_without_identity_map( ids )
+		    if_id_map{|map| [ *ids ].each{|id| map.delete(id) } }
+		    res
 		  end
 	  end
 	  
@@ -61,6 +79,13 @@ module ActiveRecord
 		  def create_with_identity_map
 			id = create_without_identidy_map
 			self.class.if_id_map{|map| map[id] = self }
+			id
+		  end
+		  
+		  def destroy_with_identity_map
+		  	res = destroy_without_identity_map
+		    self.class.if_id_map{|map| map.delete(id) }
+		    res
 		  end
 	  end
 	end

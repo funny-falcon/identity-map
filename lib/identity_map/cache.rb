@@ -18,6 +18,11 @@ module ActiveRecord
 		  @object.id = id
 		  @objects[@object.id] = v
 		end
+		
+		def delete(id)
+		  @object.id = id
+		  @objects.delete(id)
+		end
 	  end
 	  
 	  class IdMap
