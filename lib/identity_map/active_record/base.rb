@@ -54,11 +54,15 @@ module ActiveRecord
 			  if (object = map[id])
 				attrs = object.instance_variable_get( :@attributes )
 				unless (changed = object.instance_variable_get( :@changed_attributes )).blank?
-				  changed_keys = changed.keys
-				  attrs.merge!( record.except( changed_keys ) )
-				  changed.merge!( record.slice( changed_keys ) )
+				  for key, value in record
+				  	if changed.has_key? key
+				  	  changed[key] = value
+				  	else
+				  	  attrs[key] = value
+				  	end
+				  end
 				else
-				  attrs.merge!( record )
+				  attrs.merge!( record ) unless attrs == record
 				end
 				object
 			  else
