@@ -42,7 +42,7 @@ module ActiveRecord
 				  end
 				  result + find_without_identity_map( to_find )
 				else
-				  map[id] || find_without_identity_map(id)
+				  map[args0] || find_without_identity_map(args0)
 				end
 			  end
 			end || find_without_identity_map(*args)
