@@ -4,13 +4,15 @@ module ActiveRecord
 	  module ClassMethods
 		private
 		  def use_id_map
-			extend IdMapClassMethods
-			include IdMapInstanceMethods
-			class << self
-			  alias_method_chain :find, :identity_map
-			  alias_method_chain :instantiate, :identity_map
-			end
-			alias_method_chain :create, :identity_map
+            unless is_a? IdMapClassMethods
+                extend IdMapClassMethods
+                include IdMapInstanceMethods
+                class << self
+                  alias_method_chain :find, :identity_map
+                  alias_method_chain :instantiate, :identity_map
+                end
+                alias_method_chain :create, :identity_map
+            end
 		  end
 	  end
 	  
