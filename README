@@ -6,10 +6,13 @@ Adds simple hand controlled identity map for ActiveRecord.
 Installing
 ==========
 
-    gem install ar-simple-identity-map
+in Rails 2.3 in config/environment.rb
 
-or
+    config.gem 'ar-simple-idmap', :lib => 'identity_map'
+    
+in Rails 3 in Gemfile
 
+    gem 'ar-simple-idmap', :require => 'identity_map'
 
 Enabling
 ========    
