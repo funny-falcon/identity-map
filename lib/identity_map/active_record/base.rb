@@ -50,7 +50,7 @@ module ActiveRecord
                     (args[0] == :all || args[0] == :first)
                     args.size == 2 && args[1].is_a?(Hash) &&
                     args[1].all?{|key, value| key == :conditions || value.blank?} &&
-                    args[1][:conditions].keys == [:id]
+                    args[1][:conditions].try(:keys) == [:id]
 			  if from_arg0 || from_condition_ids
 				ids = from_arg0 ? args[0] : args[1][:conditions][:id]
 				if ids.is_a?(Array)
