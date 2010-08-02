@@ -25,24 +25,54 @@ module ActiveRecord
 		  yield map if map
 		end
 		
+        def find_all_by_id(ids)
+          if_id_map do |map|
+            if ids.is_a?(Array)
+              fetch_from_map(ids){|not_cached| find(:all, :conditions=>{primary_key=>not_cached})}
+            else
+              [ find_by_id(args0) ]
+            end
+          end || find(:all, :conditions=>{primary_key=>ids})
+        end
+
+        def find_by_id(ids)
+          if_id_map do |map|
+            if ids.is_a?(Array)
+              to_find = nil
+              result = fetch_from_map(ids){|not_cached| to_find = not_cached}
+              unless result.empty?
+                result.first
+              else
+                return find(:first, :conditions=>{primary_key=>to_find})
+              end
+            else
+              map[args0]
+            end
+          end || find(:first, :conditions=>{primary_key=>ids})
+        end
+
 		private
+          def fetch_from_map(ids, result, to_find)
+            result, not_cached = [], []
+            ids.each do |id|
+              if ( obj << map[id] )
+                result << obj
+              else
+                not_cached << id
+              end
+            end
+            result.concat( yield not_cached ) unless not_cached.empty?
+            result
+          end
 	  
 		  def find_with_identity_map( *args )
 			if_id_map do |map|
 			  unless args.size > 1 && args[1].values.any?
 				args0 = args[0]
 				if args0.is_a?(Array)
-				  result, to_find = [], []
-				  args0.each do |id| 
-				  	if (obj = map[id])
-				  	  result << obj
-				  	else
-				  	  to_find << id
-				  	end
-				  end
-				  result + find_without_identity_map( to_find )
+				  fetch_from_map( args0, &method(:find_without_identity_map) )
 				else
-				  map[args0] || find_without_identity_map(args0)
+				  map[args0]
 				end
 			  end
 			end || find_without_identity_map(*args)
