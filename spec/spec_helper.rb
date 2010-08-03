@@ -1,38 +1,42 @@
-begin
-  require File.dirname(__FILE__) + '/../../../../spec/spec_helper'
-rescue LoadError
-  puts "You need to install rspec in your base app"
-  exit
-end
+require 'rubygems'
+require 'spec'
+require 'active_support'
+require 'active_support/test_case'
+require 'active_record'
+require 'active_record/test_case'
+require 'action_controller'
+require 'action_view'
+require 'identity_map'
 
-plugin_spec_dir = File.dirname(__FILE__)
-ActiveRecord::Base.logger = Logger.new(plugin_spec_dir + "/debug.log")
+#ActiveRecord::Base.logger = Logger.new(STDOUT)
 
-def load_schema
-  config = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
-  ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/debug.log")
+ActiveRecord::Base.establish_connection(
+    :adapter=>'sqlite3',
+    :database=>'spec/identity_map.test.sqlite3'
+)
 
-  db_adapter = ENV['DB']
-  # no db passed, try one of these fine config-free DBs before bombing.
-  db_adapter ||=
-    begin
-      require 'rubygems'
-      require 'sqlite'
-      'sqlite'
-    rescue MissingSourceFile
-      begin
-        require 'sqlite3'
-        'sqlite3'
-      rescue MissingSourceFile
-      end
-    end
-
-  if db_adapter.nil?
-    raise "No DB Adapter selected. Pass the DB= option to pick one, or install Sqlite or Sqlite3."
+ActiveRecord::Schema.define(:version => 0) do
+  puts "Creating Schema"
+  create_table :customers, :force => true do |t|
+    t.string :name
   end
-
-  ActiveRecord::Base.establish_connection(config[db_adapter])
-  load(File.dirname(__FILE__) + "/db/schema.rb")
-  require File.dirname(__FILE__) + '/../init.rb'
+  create_table :phone_numbers, :force => true do |t|
+    t.string :number
+    t.integer :customer_id
+  end
 end
-require File.dirname(__FILE__) + '/test_models.rb'
+
+class Customer < ActiveRecord::Base
+  use_id_map
+  has_many :phone_numbers
+end
+
+customer = Customer.create(:name => "Boneman")
+
+class PhoneNumber < ActiveRecord::Base
+  use_id_map
+  belongs_to :customer
+end
+
+phone_number = customer.phone_numbers.create(:number => "8675309")
+
