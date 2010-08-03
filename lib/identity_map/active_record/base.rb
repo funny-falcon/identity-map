@@ -111,7 +111,7 @@ module ActiveRecord
 	  module IdMapInstanceMethods
 		private
 		  def create_with_identity_map
-			id = create_without_identidy_map
+			id = create_without_identity_map
 			self.class.if_id_map{|map| map[id] = self }
 			id
 		  end
