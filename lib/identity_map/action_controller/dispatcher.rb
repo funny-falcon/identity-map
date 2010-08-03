@@ -56,8 +56,6 @@ end
 
 if defined? ::ActionDispatch
   ActionDispatch::Callbacks.send :include, DispatcherMethods
-  RAILS_DEFAULT_LOGGER.warn "CACHING OBJECTS"
 else
   ActionController::Dispatcher.send :include, DispatcherMethods
-  RAILS_DEFAULT_LOGGER.warn "CACHING OBJECTS"
 end
