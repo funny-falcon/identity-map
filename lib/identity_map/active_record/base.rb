@@ -12,6 +12,7 @@ module ActiveRecord
                   alias_method_chain :instantiate, :identity_map
                 end
                 alias_method_chain :create, :identity_map
+                alias_method_chain :destroy, :identity_map
             end
 		  end
 	  end
@@ -49,10 +50,11 @@ module ActiveRecord
               from_arg0 = args.size == 1 ||
                     args[1].is_a?(Hash) && !args[1].values.any?
               from_condition_ids = !from_arg0 &&
-                    (args[0] == :all || args[0] == :first)
+                    (args[0] == :all || args[0] == :first) &&
                     args.size == 2 && args[1].is_a?(Hash) &&
                     args[1].all?{|key, value| key == :conditions || value.blank?} &&
-                    args[1][:conditions].try(:keys) == [:id]
+                    args[1][:conditions].is_a?(Hash) &&
+                    args[1][:conditions].keys == [:id]
 			  if from_arg0 || from_condition_ids
 				ids = from_arg0 ? args[0] : args[1][:conditions][:id]
 				if ids.is_a?(Array)

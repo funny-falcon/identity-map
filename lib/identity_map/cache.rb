@@ -21,7 +21,7 @@ module ActiveRecord
 		
 		def delete(id)
 		  @object.id = id
-		  @objects.delete(id)
+		  @objects.delete(@object.id)
 		end
 	  end
 	  
