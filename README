@@ -42,18 +42,36 @@ Then you should enable identity map for each model class individually:
       use_id_map
       belongs_to :tarif_plan
     end
+
+You can use identity map for all models by writing in initializer:
+
+    class ActiveRecord::Base
+      use_id_map
+    end
     
 To enable in rake task or script:
 
-    ActiveRecord.with_id_map do
+    ActiveRecord::Base.with_id_map do
       # all things here goes with identity map
+    end
+
+or equivalently
+
+    Client.with_id_map do
+      # all things here goes with identity map
+      # not only for Client
     end
 
 If you found that identity logic does wrong thing in some particular place,
 you could temporary disable it:
 
-    ActiveRecord.without_id_map do
+    ActiveRecord::Base.without_id_map do
       # all things here goes without identity map
+    end
+
+    Client.without_id_map do
+      # all things here goes without identity map
+      # not only for Client
     end
 
 
