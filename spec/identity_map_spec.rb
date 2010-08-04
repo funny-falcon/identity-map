@@ -52,6 +52,23 @@ describe "Customers" do
             c2.should be_nil
         end
         
+        it "should reload adequatly" do
+            Customer.connection.update_sql('update customers set value=2;')
+            @billy.reload
+            @billy.value.should == 2
+        end
+        
+        it "should leave changed columns" do
+            @billy.value = 3
+            b = Customer.find_by_name("billy")
+            b.value.should == 3
+            b.value_changed?.should be_true
+            b.changes.should == {'value'=>[1,3]}
+            Customer.connection.update_sql('update customers set value=2;')
+            b = Customer.find_by_name("billy")
+            b.changes.should == {'value'=>[2,3]}
+        end
+        
         after(:each) do
             @billy.destroy unless @billy.destroyed?
         end
