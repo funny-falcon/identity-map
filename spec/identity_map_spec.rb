@@ -32,6 +32,12 @@ describe "Customers" do
         d2 = p1.customer
 		d1.__id__.should == d2.target.__id__
 	end
+    
+    it "should fetch same model with not handled conditions" do
+        d1 = Customer.first
+        d2 = Customer.find(:first, :conditions=>["id = ?", d1.id])
+        d1.__id__.should == d2.__id__
+    end
 	
     describe "creation and deletion:" do
         before(:each) do
