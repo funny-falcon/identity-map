@@ -17,12 +17,10 @@ module ActionController
   	  
   	  module ClassMethods
   	  	def use_identity_map(*args)
-  	  	  skip_filter :without_identity_map, *args
   	  	  around_filter :with_identity_map, *args
   	  	end
   	  	
   	  	def dont_use_identity_map(*args)
-  	  	  skip_filter :with_identity_map, *args
   	  	  around_filter :without_identity_map, *args
   	  	end
   	  	
