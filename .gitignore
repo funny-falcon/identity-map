@@ -4,5 +4,4 @@ spec/*.sqlite*
 pkg
 rdoc
 testapp
-*.gemspec
 *~
