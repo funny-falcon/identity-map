@@ -3,5 +3,6 @@ spec/debug.log
 spec/*.sqlite*
 pkg
 rdoc
+testapp
 *.gemspec
 *~
