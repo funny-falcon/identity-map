@@ -37,8 +37,9 @@ module ActionController
   	  
 
   	end
-  	extend IdentityMap::ClassMethods
-  	include IdentityMap::InstanceMethods
+    extend IdentityMap::ClassMethods
+    include IdentityMap::InstanceMethods
+    helper_method :with_identity_map, :without_identity_map
   end
 end
 
