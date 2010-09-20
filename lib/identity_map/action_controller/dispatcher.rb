@@ -24,7 +24,7 @@ module ActionController
   	  	  around_filter :without_identity_map, *args
   	  	end
   	  	
-  	  	def use_dispater_identity_map
+  	  	def use_dispatcher_identity_map
   	  	  if defined? ::ActionDispatch
   	  	  	ActionDispatch::Callbacks.before :create_identity_map
   	  	  	ActionDispatch::Callbacks.after :remove_identity_map
