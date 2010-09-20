@@ -38,6 +38,14 @@ describe "Customers" do
     d2 = Customer.find(:first, :conditions=>["id = ?", d1.id])
     d1.__id__.should == d2.__id__
   end
+  
+  it "should refetch to fill missed attributes" do
+    d1 = Customer.find(:first, :select => 'id, name')
+    d1.read_attribute(:value).should be_nil
+    d2 = Customer.find(d1.id)
+    d2.__id__.should == d1.__id__
+    d1.value.should_not be_nil
+  end
 	
   context "creation and deletion:" do
     before(:each) do

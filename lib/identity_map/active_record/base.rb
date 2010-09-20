@@ -29,10 +29,17 @@ module ActiveRecord
         end
         
         private
+        
+          def fetch_single(map, id)
+            if (obj = map[id]) && obj.attribute_names == column_names
+              obj
+            end
+          end
+        
           def fetch_from_map(map, ids)
             result, not_cached = [], []
             ids.each do |id|
-              if ( obj = map[id] )
+              if ( obj = fetch_single(map, id) )
                 result << obj
               else
                 not_cached << id
@@ -74,7 +81,7 @@ module ActiveRecord
                     end
                   end
                 else
-                  map[ids]
+                  fetch_single(map, ids)
                 end
               end
             end || find_without_identity_map(*args)
