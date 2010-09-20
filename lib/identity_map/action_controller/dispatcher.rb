@@ -2,18 +2,18 @@ module ActionController
   class Base
   	module IdentityMap
   	  module InstanceMethods
-		def with_identity_map
-		  ActiveRecord::Base.with_id_map {
-			yield
-		  }
-		end
-		
-		def without_identity_map
-		  ActiveRecord::Base.without_id_map {
-			yield
-		  }
-		end
-	  end
+        def with_identity_map
+          ActiveRecord::Base.with_id_map {
+            yield
+          }
+        end
+        
+        def without_identity_map
+          ActiveRecord::Base.without_id_map {
+            yield
+          }
+        end
+      end
   	  
   	  module ClassMethods
   	  	def use_identity_map(*args)
@@ -44,11 +44,11 @@ end
 
 module DispatcherMethods
   def create_identity_map
-	ActiveRecord::Base.create_identity_map
+    ActiveRecord::Base.create_identity_map
   end
   
   def remove_identity_map
-	ActiveRecord::Base.drop_identity_map
+    ActiveRecord::Base.drop_identity_map
   end
 end
 
