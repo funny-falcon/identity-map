@@ -1,5 +1,9 @@
 require 'rubygems'
-require 'spec'
+begin
+  require 'spec'
+rescue LoadError
+  require 'rspec'
+end
 require 'active_support'
 require 'active_support/test_case'
 require 'active_record'

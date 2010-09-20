@@ -1,4 +1,7 @@
 spec/debug.log
 .DS_Store
-spec/db/*.sqlite*
+spec/*.sqlite*
+pkg
+rdoc
+*.gemspec
 *~
