@@ -1,10 +1,8 @@
-IdentityMap
-===========
+= IdentityMap
 
 Adds simple hand controlled identity map for ActiveRecord.
 
-Installing
-==========
+== Installing
 
 in Rails 2.3 in config/environment.rb
 
@@ -14,8 +12,7 @@ in Rails 3 in Gemfile
 
     gem 'ar-simple-idmap', :require => 'identity_map'
 
-Enabling
-========    
+== Enabling
     
 To enable in ApplicationController (it is not enabled by default).
 
@@ -73,10 +70,17 @@ you could temporary disable it:
       # all things here goes without identity map
       # not only for Client
     end
+    
+    class ClientsController
+      def strange_action
+        without_identity_map do
+          do_strange_things_without_identity_map
+        end
+      end
+    end
 
 
-Copyright
-=========
+== Copyright
 
 inspired by http://github.com/pjdavis/identity-map
 Copyright (c) 2010 Sokolov Yura aka funny_falcon, released under the MIT license.

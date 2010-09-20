@@ -1,22 +1,37 @@
-module ActiveRecord
-  class Base
-    module IdentityMap
+module ActiveRecord # :nodoc:
+  class Base # :nodoc:
+    module IdentityMap # :nodoc:
       module ClassMethods
         private
-          def use_id_map
+          # Prepares model for work with identity map. 
+          # If you want to turn on identity map for certain classes (recomended)
+          # you should do like this:
+          #
+          #   class Address
+          #     use_id_map
+          #   end
+          #
+          # If you want to turn on identity map for all ActiveRecord models (not recomended)
+          # you should put in some initializator:
+          #
+          #   class ActiveRecord::Base
+          #     use_id_map
+          #   end
+          def use_id_map() # :doc:
             unless is_a? IdMapClassMethods
-                extend IdMapClassMethods
-                include IdMapInstanceMethods
-                class << self
-                  alias_method_chain :find, :identity_map
-                  alias_method_chain :instantiate, :identity_map
-                end
-                alias_method_chain :create, :identity_map
-                alias_method_chain :destroy, :identity_map
+              extend IdMapClassMethods
+              include IdMapInstanceMethods
+              class << self
+                alias_method_chain :find, :identity_map
+                alias_method_chain :instantiate, :identity_map
+              end
+              alias_method_chain :create, :identity_map
+              alias_method_chain :destroy, :identity_map
             end
           end
       end
       
+      # :enddoc:
       module IdMapClassMethods
 
         def id_map
