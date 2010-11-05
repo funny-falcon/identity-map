@@ -31,10 +31,8 @@ module ActiveRecord
         associated_record_map = associated_records.inject({}){|h, r| h[r.id.to_s] = r; h}
         joins.each do |j|
           mapped_records = id_to_record_map[j['prnt_id'].to_s]
-          $stderr.puts(mapped_records.inspect + ' ' + associated_record_map[j['chld_id'].to_s].inspect)
           add_preloaded_records_to_collection(mapped_records, reflection.name, associated_record_map[j['chld_id'].to_s])
         end
-        $stderr.puts("exit")
       end
       alias_method_chain :preload_has_and_belongs_to_many_association, :identity_map
       

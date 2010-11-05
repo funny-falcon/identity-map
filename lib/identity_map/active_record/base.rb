@@ -86,7 +86,6 @@ module ActiveRecord # :nodoc:
                 ids = from_arg0 ? args[0] : (args1[:conditions][:id] || args1[:conditions]['id'])
                 records = if ids.is_a?(Array)
                   if from_arg0
-                    $stderr.puts("from arg0 #{ids.inspect}")
                     fetch_from_map( map, ids, &method(:find_without_identity_map) )
                   elsif args[0] == :all
                     fetch_from_map( map, ids ){|not_cached|
