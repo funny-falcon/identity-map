@@ -27,6 +27,7 @@ module ActiveRecord # :nodoc:
               end
               alias_method_chain :create, :identity_map
               alias_method_chain :destroy, :identity_map
+              alias_method_chain :reload, :identity_map
             end
           end
       end
@@ -69,21 +70,26 @@ module ActiveRecord # :nodoc:
       
           def find_with_identity_map( *args )
             if_id_map do |map|
-              from_arg0 = args.size == 1 ||
-                    args[1].is_a?(Hash) && !args[1].values.any?
+              if args.size > 1 && args.all?{|a| a.is_a?(Integer) || a.is_a?(String)}
+                args = [ args ]
+              end
+              args1 = args[1]
+              from_arg0 = args1.nil? || 
+                    args1.is_a?(Hash) && !args1.values.any?
               from_condition_ids = !from_arg0 &&
                     (args[0] == :all || args[0] == :first) &&
                     args.size == 2 && args[1].is_a?(Hash) &&
-                    args[1].all?{|key, value| key == :conditions || value.blank?} &&
-                    args[1][:conditions].is_a?(Hash) &&
-                    args[1][:conditions].keys == [:id]
+                    args1.all?{|key, value| key == :conditions || key == :include || !value.present?} &&
+                    args1[:conditions].is_a?(Hash) &&
+                    (args1[:conditions].keys == [:id] || args1[:conditions].keys == ['id'])
               if from_arg0 || from_condition_ids
-                ids = from_arg0 ? args[0] : args[1][:conditions][:id]
-                if ids.is_a?(Array)
+                ids = from_arg0 ? args[0] : (args1[:conditions][:id] || args1[:conditions]['id'])
+                records = if ids.is_a?(Array)
                   if from_arg0
+                    $stderr.puts("from arg0 #{ids.inspect}")
                     fetch_from_map( map, ids, &method(:find_without_identity_map) )
                   elsif args[0] == :all
-                    fetch_from_map( map, ids ){|not_cached| 
+                    fetch_from_map( map, ids ){|not_cached|
                         find_without_identity_map(:all, {:conditions=>{:id=>not_cached}})
                     }
                   elsif args[0] == :first
@@ -98,6 +104,13 @@ module ActiveRecord # :nodoc:
                 else
                   fetch_single(map, ids)
                 end
+                if method_defined?(:merge_includes) && 
+                   (include_associations = merge_includes(scope(:find, :include), args1.try(:[],:include))).any?
+                  preload_associations(records, include_associations)
+                elsif args1.try(:[], :include)
+                  preload_associations(records, args1[:include])
+                end
+                records
               end
             end || find_without_identity_map(*args)
           end
@@ -144,6 +157,12 @@ module ActiveRecord # :nodoc:
             res = destroy_without_identity_map
             self.class.if_id_map{|map| map.delete(id) }
             res
+          end
+          
+          def reload_with_identity_map
+            self.class.without_id_map do
+              reload_without_identity_map
+            end
           end
       end
     end
