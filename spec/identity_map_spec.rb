@@ -138,6 +138,23 @@ describe "Customers" do
       c3.__id__.should == c2.__id__
     end
   end
+  
+  context "has and belongs to many" do
+    before(:each) do
+      gotwo = Building.create(:name=>'GoTwo')
+      Address.find(:all).each do |address|
+        gotwo.addresses << address
+      end
+    end
+    
+    it "should load habtm adequatly" do
+      buildings = Building.find(:all, :include=>:addresses)
+      buildings[0].addresses.loaded?.should be_true
+      buildings[0].addresses.to_a.size.should == 2
+      buildings[1].addresses.loaded?.should be_true
+      buildings[1].addresses.to_a.size.should == 2
+    end
+  end
     
 	after(:each) do
 		ActiveRecord::Base.drop_identity_map

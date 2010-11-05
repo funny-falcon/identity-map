@@ -31,7 +31,17 @@ ActiveRecord::Schema.define(:version => 0) do
   end
   create_table :phone_numbers, :force => true do |t|
     t.string :number
-    t.integer :customer_id
+    t.references :customer
+  end
+  create_table :buildings, :force => true do |t|
+    t.string :name
+  end
+  create_table :addresses, :force => true do |t|
+    t.string :name
+  end
+  create_table :addresses_buildings, :force => true, :id => false do |t|
+    t.references :building
+    t.references :address
   end
 end
 
@@ -49,3 +59,19 @@ end
 
 phone_number = customer.phone_numbers.create(:number => "8675309")
 
+class Building < ActiveRecord::Base
+  use_id_map
+  has_and_belongs_to_many :addresses
+end
+
+building = Building.create(:name => 'GoOne')
+
+class Address < ActiveRecord::Base
+  use_id_map
+  has_and_belongs_to_many :customers
+end
+
+address1 = Address.create(:name=>'volga')
+address2 = Address.create(:name=>'don')
+building.addresses << address1
+building.addresses << address2
