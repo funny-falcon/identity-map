@@ -46,7 +46,7 @@ module ActiveRecord # :nodoc:
         private
         
           def fetch_single(map, id)
-            if (obj = map[id]) && obj.attribute_names == column_names
+            if (obj = map[id]) && !(column_names - obj.attribute_names).present?
               obj
             end
           end
