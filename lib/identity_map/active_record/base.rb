@@ -100,7 +100,7 @@ module ActiveRecord # :nodoc:
                       find_without_identity_map(:first, {:conditions=>{:id=>to_find}})
                     end
                   end
-                else
+                elsif !ids.is_a?(Symbol)
                   fetch_single(map, ids)
                 end
                 if method_defined?(:merge_includes) && 
